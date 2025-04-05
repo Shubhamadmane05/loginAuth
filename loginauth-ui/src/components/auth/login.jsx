@@ -18,10 +18,10 @@ const Login = () => {
       setErrorMessage("Role is not recognized.");
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setErrorMessage(""); // clear previous error
+  
     try {
       const response = await fetch("http://localhost:8080/auth/login", {
         method: "POST",
@@ -30,25 +30,40 @@ const Login = () => {
         },
         body: JSON.stringify({ username, password }),
       });
-
-      const data = await response.json();
+  
+      let data;
+      const contentType = response.headers.get("content-type");
+  
+      // Check if the response is JSON or plain text
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        data = { message: text }; // wrap plain string in object
+      }
+  
       console.log("Backend Response:", data);
-
+  
       if (response.ok && data.token && data.userData) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.userData);
+        localStorage.setItem("username", username);
         handleLoginSuccess(data.userData);
+      } else if (response.status === 403 || response.status === 401) {
+     
+        setErrorMessage(data.message || "Invalid username or password.");
       } else {
-        console.error("Invalid API response:", data);
-        setErrorMessage(data.message || "Invalid server response.");
+        // Other errors
+        setErrorMessage(data.message || "Something went wrong. Please try again.");
       }
-
+  
     } catch (error) {
       console.error("Login Error:", error);
-      setErrorMessage("Server error. Please try again.");
+      setErrorMessage("Server error. Please try again later.");
     }
   };
-
+  
+  
   return (
     <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
       <div className="card shadow p-4" style={{ maxWidth: "400px", width: "100%" }}>

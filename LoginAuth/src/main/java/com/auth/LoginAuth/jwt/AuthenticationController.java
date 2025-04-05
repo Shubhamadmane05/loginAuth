@@ -44,7 +44,9 @@ public class AuthenticationController {
         }
 
         // If no user found or credentials are incorrect
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid username or password.");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("message", "Invalid username or password."));
+
     }
 }
 
