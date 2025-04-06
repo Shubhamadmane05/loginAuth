@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [photo, setPhoto]=useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
@@ -48,6 +49,7 @@ const Login = () => {
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.userData);
         localStorage.setItem("username", username);
+        localStorage.setItem("photo", photo);
         handleLoginSuccess(data.userData);
       } else if (response.status === 403 || response.status === 401) {
      

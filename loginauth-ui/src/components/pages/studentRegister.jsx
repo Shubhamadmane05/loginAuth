@@ -11,6 +11,8 @@ const RegisterForm = () => {
     mobile: "",
   });
 
+  const [photo, setPhoto] = useState(null);
+  const [signature, setSignature] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [success, setSuccess] = useState(false);
 
@@ -21,14 +23,17 @@ const RegisterForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const data = new FormData();
+    for (const key in formData) {
+      data.append(key, formData[key]);
+    }
+    if (photo) data.append("photo", photo);
+    if (signature) data.append("signature", signature);
 
     try {
       const response = await fetch("http://localhost:8080/student/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        body: data,
       });
 
       if (response.ok) {
@@ -36,8 +41,8 @@ const RegisterForm = () => {
         setErrorMessage("");
         setTimeout(() => navigate("/login"), 2000);
       } else {
-        const data = await response.json();
-        setErrorMessage(data.message || "Registration failed.");
+        const result = await response.json();
+        setErrorMessage(result.message || "Registration failed.");
       }
     } catch (error) {
       setErrorMessage("Server error. Please try again.");
@@ -57,7 +62,7 @@ const RegisterForm = () => {
         )}
         {errorMessage && <div className="alert alert-danger text-center">{errorMessage}</div>}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
           <div className="mb-3">
             <input
               type="text"
@@ -114,6 +119,28 @@ const RegisterForm = () => {
               placeholder="Mobile"
               value={formData.mobile}
               onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">Upload Photo</label>
+            <input
+              type="file"
+              className="form-control"
+              accept="image/*"
+              onChange={(e) => setPhoto(e.target.files[0])}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label">Upload Signature</label>
+            <input
+              type="file"
+              className="form-control"
+              accept="image/*"
+              onChange={(e) => setSignature(e.target.files[0])}
               required
             />
           </div>
